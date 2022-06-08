@@ -22,6 +22,8 @@ import {
   EnterLottery,
   getBalance,
   LotteryContract,
+  PickaWinner,
+  getAccount,
 } from "./component/wallet";
 import { TextField } from "@mui/material";
 import { ethers, providers } from "ethers";
@@ -29,6 +31,7 @@ import { ethers, providers } from "ethers";
 function App() {
   const [isWalletconnected, setisWalletConnected] = useState(false);
   const [IntractWithContract, setIntractWithContract] = useState();
+  const [account, setAccount] = useState("abc");
   const [allPlayer, setAllPlayer] = useState([]);
   const [balance, setBalance] = useState(0);
   const [enterdValue, setEnterdValue] = useState();
@@ -51,7 +54,8 @@ function App() {
       // const balance = await window.web3.eth.getBalance(managerResult);
 
       const balanceResult = await getBalance();
-
+      const getConnectedAccount = await getAccount();
+      setAccount(getConnectedAccount[0]);
       setBalance(balanceResult);
       setManager(managerResult);
 
@@ -78,22 +82,29 @@ function App() {
               component="div"
               sx={{ flexGrow: 1 }}
             ></Typography>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={async () => {
-                const result = await connectMetaMaskaction();
-                setTimeout(() => {
+
+            {isWalletconnected ? (
+              <Button variant="contained" color="success" disabled>
+                Connected
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={async () => {
+                  const result = await connectMetaMaskaction();
+                  // setTimeout(() => {
                   if (result) {
                     setisWalletConnected(true);
                   } else {
                     setisWalletConnected(false);
                   }
-                }, 1000);
-              }}
-            >
-              Connect
-            </Button>
+                  // }, 1000);
+                }}
+              >
+                Connect
+              </Button>
+            )}
           </Toolbar>
         </AppBar>
       </Box>
@@ -105,7 +116,7 @@ function App() {
           alignContent={"center"}
         >
           <Typography variant="subtitle1" component="div" sx={{ flexGrow: 1 }}>
-            This Contract is managed by {manager}
+            This Contract is managed by {manager} {balance}
           </Typography>
           <Typography variant="subtitle1" component="div" sx={{ flexGrow: 1 }}>
             Total Number of Player {allPlayer.length}
@@ -124,6 +135,7 @@ function App() {
               title={"Try Your Luck"}
               style={{ textAlign: "center" }}
             />
+            {enterdValue < balance ? "" : "insufficient Funds"}
             <CardContent>
               <TextField
                 id="outlined-basic"
@@ -140,6 +152,7 @@ function App() {
               <Button
                 size="small"
                 variant="contained"
+                disabled={enterdValue < balance ? true : false}
                 onClick={() => {
                   EnterLottery(enterdValue);
                 }}
@@ -148,6 +161,35 @@ function App() {
               </Button>
             </CardActions>
           </Card>
+        </Grid>
+      </Grid>{" "}
+      <Grid container xs={12} justifyContent={"center"} alignContent={"center"}>
+        <Grid
+          container
+          xs={6}
+          justifyContent={"center"}
+          alignContent={"center"}
+        >
+          {manager == account && (
+            <Box>
+              <Typography
+                variant="subtitle1"
+                component="div"
+                sx={{ flexGrow: 1 }}
+              >
+                Pick a Winner
+              </Typography>
+
+              <Button
+                variant="contained"
+                onClick={async () => {
+                  const result = await PickaWinner();
+                }}
+              >
+                Pick a Winner
+              </Button>
+            </Box>
+          )}
         </Grid>
       </Grid>
     </>

@@ -93,11 +93,15 @@ export const connectMetaMaskaction = async () => {
 
     window.ethereum &&
       window.ethereum.on("accountsChanged", async (accounts) => {
-        // console.log(accounts);
+        window.location.reload();
       });
     window.ethereum &&
       window.ethereum.on("chainChanged", async (chainId) => {
         // console.log("chainChanged............");
+      });
+    window.ethereum &&
+      window.ethereum.on("disconnect", () => {
+        window.location.reload();
       });
 
     const metamaskResult = await window.ethereum.request({
@@ -129,6 +133,11 @@ export const LotteryContract = async () => {
   const signer = provider.getSigner();
   return await new Contract(contractAddress, minAbi, signer);
 };
+export const getAccount = async () => {
+  return await window.ethereum.request({
+    method: "eth_requestAccounts",
+  });
+};
 
 export const getBalance = async () => {
   const accounts = await window.ethereum.request({
@@ -149,5 +158,12 @@ export const EnterLottery = async (value) => {
   const sendAmount = await intractWithWeb3.enter({
     value: ethers.utils.parseEther(value),
   });
+  return sendAmount;
+};
+
+export const PickaWinner = async (value) => {
+  let provider = new ethers.providers.Web3Provider(window.ethereum);
+  let intractWithWeb3 = await LotteryContract();
+  const sendAmount = await intractWithWeb3.pickWinner();
   return sendAmount;
 };
